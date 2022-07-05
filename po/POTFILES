@@ -1,0 +1,7 @@
+data/org.igorgue.NvimPythonUI.desktop.in
+data/org.igorgue.NvimPythonUI.appdata.xml.in
+data/org.igorgue.NvimPythonUI.gschema.xml
+src/window.ui
+src/main.py
+src/window.py
+
