@@ -27,7 +27,7 @@
 # authorization.
 import pynvim
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib, Vte, Gdk
 
 
 @Gtk.Template(resource_path='/org/igorgue/NvimPythonUI/window.ui')
@@ -41,11 +41,34 @@ class NvimPythonUiWindow(Gtk.ApplicationWindow):
 
         self.nvim = pynvim.attach('child', argv=["/bin/env", "nvim", "--embed", "/home/igor/Code/liviano/Makefile"])
 
-        width, height = self.get_default_size()
+        self.terminal = Vte.Terminal()
+        self.pty = Vte.Pty.new_sync(Vte.PtyFlags.DEFAULT)
+        self.terminal.set_pty(self.pty)
 
-        self.nvim.ui_attach(width, height)
+        self.pty.spawn_async(
+            None,
+            ["/usr/bin/nvim"],
+            None,
+            GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+            None,
+            None,
+            -1,
+            None,
+        )
 
-        print(str(self.nvim.current.buffer[:]))
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.NEVER)
+        scrolled.set_hexpand(True)
+        scrolled.set_vexpand(True)
+        scrolled.set_child(self.terminal)
+
+        box.append(scrolled)
+
+        self.set_child(box)
+
+        # self.nvim.ui_attach(width, height)
 
 
 class AboutDialog(Gtk.AboutDialog):

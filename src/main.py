@@ -25,20 +25,15 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written
 # authorization.
-
 import sys
+
 import gi
-import pynvim
 
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-
-from gi.repository import Gtk, Gio, Adw
-
 gi.require_version('Vte', '3.91')
 
-from gi.repository import Vte
-
+from gi.repository import Gtk, Gio, Adw, Vte
 from .window import NvimPythonUiWindow, AboutDialog
 
 
@@ -95,41 +90,3 @@ def main(version):
     app = Nvim_python_uiApplication()
 
     return app.run(sys.argv)
-
-
-# tmp_dir = f"{os.environ.get('XDG_RUNTIME_DIR')}/app/{os.environ.get('FLATPAK_ID')}"
-# socket_file = f"{tmp_dir}/nvim-ui"
-# socket_host = "127.0.0.1:6666"
-# ld_library_path = f"{os.environ.get('LD_LIBRARY_PATH')}:/run/host/usr/lib:/run/host/usr/lib/x86_64-linux-gnu"
-
-# env = dict(os.environ, **{
-#     "NVIM_LISTEN_ADDRESS": socket_file,
-#     "PATH": f"{os.environ.get('PATH')}:/run/host/usr/bin",
-#     "LD_LIBRARY_PATH": ld_library_path
-# })
-
-# print(env)
-
-# process = subprocess.Popen([f"nvim", "--headless --embed --listen {socket_host}"], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
-# (pid, stdin, stdout, stderr) = GLib.spawn_async(
-#     ["/run/host/usr/bin/nvim", "--listen", f"{socket_host}"],
-#     envp=['{}={}'.format(k, v) for k, v in env.items()],
-#     standard_input=True,
-#     standard_output=True,
-#     standard_error=True
-# )
-
-# import time
-# time.sleep(3)
-# print(nvim)
-# print(socket_file)
-
-# editor = pynvim.attach("tcp", address="127.0.0.1", port=6666)
-# editor = pynvim.attach('child', argv=["/run/host/usr/bin/env", "nvim", "--embed"])
-
-# buffer = editor.current.buffer # Get the current buffer
-# buffer[0] = 'replace first line'
-# buffer[:] = ['replace whole buffer']
-# editor.command('vsplit')
-# editor.windows[1].width = 10
