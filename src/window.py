@@ -27,48 +27,55 @@
 # authorization.
 import pynvim
 
-from gi.repository import Gtk, GLib, Vte, Gdk
+from gi.repository import Gtk, Pango, Gdk, GLib, Vte, Gdk
 
 
 @Gtk.Template(resource_path='/org/igorgue/NvimPythonUI/window.ui')
 class NvimPythonUiWindow(Gtk.ApplicationWindow):
     __gtype_name__ = 'NvimPythonUiWindow'
 
-    label = Gtk.Template.Child()
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.nvim = pynvim.attach('child', argv=["/bin/env", "nvim", "--embed", "/home/igor/Code/liviano/Makefile"])
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+
+        self.set_child(box)
+
+        # self.nvim = pynvim.attach('child', argv=["/bin/env", "nvim", "--embed", "/home/igor/Code/liviano/Makefile"])
 
         self.terminal = Vte.Terminal()
         self.pty = Vte.Pty.new_sync(Vte.PtyFlags.DEFAULT)
         self.terminal.set_pty(self.pty)
 
+        self.terminal.set_color_background(Gdk.RGBA())
+        self.terminal.set_font(Pango.FontDescription.from_string('Iosevka 14'))
+        self.terminal.set_rewrap_on_resize(True)
+
         self.pty.spawn_async(
             None,
-            ["/usr/bin/nvim"],
+            ["/bin/env", "nvim", "--listen", "/tmp/nvim-python-ui.socket"],
             None,
             GLib.SpawnFlags.DO_NOT_REAP_CHILD,
             None,
             None,
             -1,
             None,
+            self.ready
         )
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-
         scrolled = Gtk.ScrolledWindow()
-        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.NEVER)
         scrolled.set_hexpand(True)
         scrolled.set_vexpand(True)
         scrolled.set_child(self.terminal)
 
         box.append(scrolled)
 
-        self.set_child(box)
-
         # self.nvim.ui_attach(width, height)
+    def ready(self, pty, task):
+        self.nvim = pynvim.attach('socket', path='/tmp/nvim-python-ui.socket')
+
+        self.nvim.ui_try_resize(self.get_allocated_width(), self.get_allocated_height())
+        self.nvim.command("vsp")
 
 
 class AboutDialog(Gtk.AboutDialog):

@@ -89,4 +89,5 @@ def main(version):
 
     app = Nvim_python_uiApplication()
 
+
     return app.run(sys.argv)
