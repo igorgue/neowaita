@@ -76,8 +76,9 @@ class NvimPythonUiWindow(Adw.ApplicationWindow):
         self.terminal.connect("child-exited", self.terminal_done)
 
         self.nvim = pynvim.attach('socket', path='/tmp/nvim-python-ui.socket')
-        self.nvim.ui_attach(self.width, self.height)
+        self.nvim.ui_attach(self.box_width, self.box_height)
 
+        self.connect("notify", self.notified)
         self.terminal.grab_focus()
 
     def pty_cancelled(self, pty):
@@ -87,16 +88,23 @@ class NvimPythonUiWindow(Adw.ApplicationWindow):
     def terminal_done(self, terminal, error):
         self.close()
 
-    # XXX Are you serious GTK? why not just self.props.width?
+    def notified(self, app, param):
+        if param.name in ["default-width", "default-height", "maximized"]:
+            self.resized()
+
+    def resized(self):
+        self.nvim.ui_try_resize(self.box_width, self.box_height)
+
+    # XXX I think there must be a better way to get the box's width
     @property
-    def width(self):
-        w = self.get_allocated_width()
+    def box_width(self):
+        w = self.terminal_box.get_allocated_width()
 
         return w if w > 0 else self.props.default_width
 
     @property
-    def height(self):
-        h = self.get_allocated_height()
+    def box_height(self):
+        h = self.terminal_box.get_allocated_height()
 
         return h if h > 0 else self.props.default_height
 
