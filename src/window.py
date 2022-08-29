@@ -27,56 +27,78 @@
 # authorization.
 import pynvim
 
-from gi.repository import Gtk, Adw, Pango, Gdk, GLib, Vte, Gdk
+from gi.repository import Gtk, Gio, Adw, Pango, Gdk, GLib, Vte, Gdk
 
 
 @Gtk.Template(resource_path='/org/igorgue/NvimPythonUI/window.ui')
 class NvimPythonUiWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'NvimPythonUiWindow'
 
+    pid = -1
+    pty = Vte.Pty.new_sync(Vte.PtyFlags.DEFAULT)
+    command = ["/bin/env", "nvim", "--listen", "/tmp/nvim-python-ui.socket"]
+    default_font = "Iosevka 14"
+
+    terminal = Gtk.Template.Child()
+    terminal_box = Gtk.Template.Child()
+
+    cancellable = Gio.Cancellable.new()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        assert self.terminal
+        assert self.terminal_box
 
-        self.set_content(box)
-
-        # self.nvim = pynvim.attach('child', argv=["/bin/env", "nvim", "--embed", "/home/igor/Code/liviano/Makefile"])
-
-        self.terminal = Vte.Terminal()
-        self.pty = Vte.Pty.new_sync(Vte.PtyFlags.DEFAULT)
         self.terminal.set_pty(self.pty)
-
         self.terminal.set_color_background(Gdk.RGBA())
-        self.terminal.set_font(Pango.FontDescription.from_string("Iosevka 14"))
+        self.terminal.set_font(Pango.FontDescription.from_string(self.default_font))
         self.terminal.set_rewrap_on_resize(True)
 
-        self.pty.spawn_async(
+        self.cancellable.connect(self.pty_cancelled)
+
+        self.x = self.pty.spawn_async(
             None,
-            ["/bin/env", "nvim", "--listen", "/tmp/nvim-python-ui.socket"],
+            self.command,
             None,
-            GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+            GLib.SpawnFlags.DEFAULT,
             None,
             None,
             -1,
-            None,
-            self.ready
+            self.cancellable,
+            self.pty_ready
         )
 
-        scrolled = Gtk.ScrolledWindow()
-        scrolled.set_hexpand(True)
-        scrolled.set_vexpand(True)
-        scrolled.set_child(self.terminal)
+    def pty_ready(self, pty, task):
+        _, self.pid = pty.spawn_finish(task)
 
-        box.append(scrolled)
+        self.terminal.watch_child(self.pid)
+        self.terminal.connect("child-exited", self.terminal_done)
 
-        # self.nvim.ui_attach(width, height)
-
-    def ready(self, pty, task):
         self.nvim = pynvim.attach('socket', path='/tmp/nvim-python-ui.socket')
+        self.nvim.ui_attach(self.width, self.height)
 
-        # self.nvim.ui_try_resize(self.get_allocated_width(), self.get_allocated_height())
-        # self.nvim.command("vsp")
+        self.terminal.grab_focus()
+
+    def pty_cancelled(self, pty):
+        print("pty cancelled... TODO reconnection or error page")
+
+
+    def terminal_done(self, terminal, error):
+        self.close()
+
+    # XXX Are you serious GTK? why not just self.props.width?
+    @property
+    def width(self):
+        w = self.get_allocated_width()
+
+        return w if w > 0 else self.props.default_width
+
+    @property
+    def height(self):
+        h = self.get_allocated_height()
+
+        return h if h > 0 else self.props.default_height
 
 
 class AboutDialog(Gtk.AboutDialog):
