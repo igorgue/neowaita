@@ -27,11 +27,11 @@
 # authorization.
 import pynvim
 
-from gi.repository import Gtk, Pango, Gdk, GLib, Vte, Gdk
+from gi.repository import Gtk, Adw, Pango, Gdk, GLib, Vte, Gdk
 
 
 @Gtk.Template(resource_path='/org/igorgue/NvimPythonUI/window.ui')
-class NvimPythonUiWindow(Gtk.ApplicationWindow):
+class NvimPythonUiWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'NvimPythonUiWindow'
 
     def __init__(self, **kwargs):
@@ -39,7 +39,7 @@ class NvimPythonUiWindow(Gtk.ApplicationWindow):
 
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
 
-        self.set_child(box)
+        self.set_content(box)
 
         # self.nvim = pynvim.attach('child', argv=["/bin/env", "nvim", "--embed", "/home/igor/Code/liviano/Makefile"])
 
@@ -48,7 +48,7 @@ class NvimPythonUiWindow(Gtk.ApplicationWindow):
         self.terminal.set_pty(self.pty)
 
         self.terminal.set_color_background(Gdk.RGBA())
-        self.terminal.set_font(Pango.FontDescription.from_string('Iosevka 14'))
+        self.terminal.set_font(Pango.FontDescription.from_string("Iosevka 14"))
         self.terminal.set_rewrap_on_resize(True)
 
         self.pty.spawn_async(
@@ -71,17 +71,19 @@ class NvimPythonUiWindow(Gtk.ApplicationWindow):
         box.append(scrolled)
 
         # self.nvim.ui_attach(width, height)
+
     def ready(self, pty, task):
         self.nvim = pynvim.attach('socket', path='/tmp/nvim-python-ui.socket')
 
-        self.nvim.ui_try_resize(self.get_allocated_width(), self.get_allocated_height())
-        self.nvim.command("vsp")
+        # self.nvim.ui_try_resize(self.get_allocated_width(), self.get_allocated_height())
+        # self.nvim.command("vsp")
 
 
 class AboutDialog(Gtk.AboutDialog):
 
     def __init__(self, parent):
         Gtk.AboutDialog.__init__(self)
+
         self.props.program_name = 'nvim-python-ui'
         self.props.version = "0.1.0"
         self.props.authors = ['Igor Guerrero']
