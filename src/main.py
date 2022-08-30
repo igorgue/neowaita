@@ -1,6 +1,6 @@
 # main.py
 #
-# Copyright 2022 Igor Guerrero
+# Copyright 2022 Igor
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -25,8 +25,10 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written
 # authorization.
-import sys
+#
+# SPDX-License-Identifier: MIT
 
+import sys
 import gi
 
 gi.require_version('Gtk', '4.0')
@@ -35,16 +37,15 @@ gi.require_version('Vte', '3.91')
 
 from gi.repository import Adw, Gtk, Gio, GObject, Vte
 
+from .window import NeowaitaWindow
+
+
 GObject.type_register(Vte.Terminal)
-
-from .window import NvimPythonUiWindow, AboutDialog
-
-
-class Nvim_python_uiApplication(Adw.Application):
+class NeowaitaApplication(Adw.Application):
     """The main application singleton class."""
 
     def __init__(self):
-        super().__init__(application_id='org.igorgue.NvimPythonUI',
+        super().__init__(application_id='org.igorgue.NeoWaita',
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
         self.create_action('quit', self.quit, ['<primary>q'])
         self.create_action('about', self.on_about_action)
@@ -58,12 +59,18 @@ class Nvim_python_uiApplication(Adw.Application):
         """
         win = self.props.active_window
         if not win:
-            win = NvimPythonUiWindow(application=self)
+            win = NeowaitaWindow(application=self)
         win.present()
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
-        about = AboutDialog(self.props.active_window)
+        about = Adw.AboutWindow(transient_for=self.props.active_window,
+                                application_name='neowaita',
+                                application_icon='org.igorgue.NeoWaita',
+                                developer_name='Igor',
+                                version='0.1.0',
+                                developers=['Igor'],
+                                copyright='© 2022 Igor')
         about.present()
 
     def on_preferences_action(self, widget, _):
@@ -88,9 +95,5 @@ class Nvim_python_uiApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
-    assert version
-
-    app = Nvim_python_uiApplication()
-
-
+    app = NeowaitaApplication()
     return app.run(sys.argv)

@@ -1,8 +1,8 @@
 #!@PYTHON@
 
-# nvim-python-ui.in
+# neowaita.in
 #
-# Copyright 2022 Igor Guerrero
+# Copyright 2022 Igor
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -27,6 +27,8 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written
 # authorization.
+#
+# SPDX-License-Identifier: MIT
 
 import os
 import sys
@@ -40,16 +42,16 @@ localedir = '@localedir@'
 
 sys.path.insert(1, pkgdatadir)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-locale.bindtextdomain('nvim-python-ui', localedir)
-locale.textdomain('nvim-python-ui')
-gettext.install('nvim-python-ui', localedir)
+locale.bindtextdomain('neowaita', localedir)
+locale.textdomain('neowaita')
+gettext.install('neowaita', localedir)
 
 if __name__ == '__main__':
     import gi
 
     from gi.repository import Gio
-    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'nvim-python-ui.gresource'))
+    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'neowaita.gresource'))
     resource._register()
 
-    from nvim_python_ui import main
+    from neowaita import main
     sys.exit(main.main(VERSION))

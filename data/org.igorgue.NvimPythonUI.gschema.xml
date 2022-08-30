@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="nvim-python-ui">
-	<schema id="org.igorgue.NvimPythonUI" path="/org/igorgue/NvimPythonUI/">
-	</schema>
-</schemalist>

@@ -1,6 +1,6 @@
 # window.py
 #
-# Copyright 2022 Igor Guerrero
+# Copyright 2022 Igor
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -25,19 +25,24 @@
 # holders shall not be used in advertising or otherwise to promote the sale,
 # use or other dealings in this Software without prior written
 # authorization.
+#
+# SPDX-License-Identifier: MIT
 import pynvim
 
 from gi.repository import Gtk, Gio, Adw, Pango, Gdk, GLib, Vte, Gdk
 
+from .utils import is_flatpak, get_socket_file, clean_socket
 
-@Gtk.Template(resource_path='/org/igorgue/NvimPythonUI/window.ui')
-class NvimPythonUiWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'NvimPythonUiWindow'
+
+@Gtk.Template(resource_path='/org/igorgue/NeoWaita/window.ui')
+class NeowaitaWindow(Adw.ApplicationWindow):
+    __gtype_name__ = 'NeowaitaWindow'
 
     pid = -1
-    pty = Vte.Pty.new_sync(Vte.PtyFlags.DEFAULT)
-    command = ["/bin/env", "nvim", "--listen", "/tmp/nvim-python-ui.socket"]
-    default_font = "Iosevka 14"
+    pty = Vte.Pty.new_sync(Vte.PtyFlags.NO_CTTY)
+
+    command = ["/bin/env", "nvim", "--listen", get_socket_file()]
+    default_font = "Monospace 14"
 
     terminal = Gtk.Template.Child()
     terminal_box = Gtk.Template.Child()
@@ -57,7 +62,17 @@ class NvimPythonUiWindow(Adw.ApplicationWindow):
 
         self.cancellable.connect(self.pty_cancelled)
 
-        self.x = self.pty.spawn_async(
+        if is_flatpak():
+            self.command = [
+                "/usr/bin/flatpak-spawn",
+                "--host",
+                "--watch-bus",
+                *self.command
+            ]
+
+        clean_socket()
+
+        self.pty.spawn_async(
             None,
             self.command,
             None,
@@ -69,28 +84,36 @@ class NvimPythonUiWindow(Adw.ApplicationWindow):
             self.pty_ready
         )
 
+
     def pty_ready(self, pty, task):
         _, self.pid = pty.spawn_finish(task)
 
         self.terminal.watch_child(self.pid)
         self.terminal.connect("child-exited", self.terminal_done)
 
-        self.nvim = pynvim.attach('socket', path='/tmp/nvim-python-ui.socket')
+        self.nvim = pynvim.attach("socket", path=get_socket_file())
         self.nvim.ui_attach(self.box_width, self.box_height)
 
         self.connect("notify", self.notified)
+        self.connect("destroy", self.destroyed)
         self.terminal.grab_focus()
 
     def pty_cancelled(self, pty):
         print("pty cancelled... TODO reconnection or error page")
 
-
     def terminal_done(self, terminal, error):
+        self.nvim.close()
         self.close()
 
     def notified(self, app, param):
         if param.name in ["default-width", "default-height", "maximized"]:
             self.resized()
+
+        print(param.name)
+
+    def destroyed(self):
+        print('destroyed')
+        self.nvim.close()
 
     def resized(self):
         self.nvim.ui_try_resize(self.box_width, self.box_height)
@@ -108,16 +131,3 @@ class NvimPythonUiWindow(Adw.ApplicationWindow):
 
         return h if h > 0 else self.props.default_height
 
-
-class AboutDialog(Gtk.AboutDialog):
-
-    def __init__(self, parent):
-        Gtk.AboutDialog.__init__(self)
-
-        self.props.program_name = 'nvim-python-ui'
-        self.props.version = "0.1.0"
-        self.props.authors = ['Igor Guerrero']
-        self.props.copyright = '2022 Igor Guerrero'
-        self.props.logo_icon_name = 'org.igorgue.NvimPythonUI'
-        self.props.modal = True
-        self.set_transient_for(parent)

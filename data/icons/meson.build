@@ -1,4 +1,4 @@
-application_id = 'org.igorgue.NvimPythonUI'
+application_id = 'org.igorgue.NeoWaita'
 
 scalable_dir = join_paths('hicolor', 'scalable', 'apps')
 install_data(

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
    <requires lib="gtk" version="4.0" />
-   <requires lib="libadwaita" version="1.0" />
-   <requires lib="vte" version="3.91" />
-  <template class="NvimPythonUiWindow" parent="AdwApplicationWindow">
+   <requires lib="Adw" version="1.0" />
+   <requires lib="Vte" version="3.91" />
+  <template class="NeowaitaWindow" parent="AdwApplicationWindow">
     <property name="default-width">800</property>
     <property name="default-height">600</property>
     <child>

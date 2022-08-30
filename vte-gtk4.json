@@ -1,0 +1,15 @@
+{
+    "name" : "vte",
+    "buildsystem" : "meson",
+    "config-opts": [
+        "-Dgtk4=true",
+        "-Dgtk3=false"
+    ],
+    "sources" : [
+        {
+            "type" : "archive",
+            "url" : "https://gitlab.gnome.org/GNOME/vte/-/archive/1398ac862fb10b3cb7cdfc8267be2df5d5f39eb5/vte-1398ac862fb10b3cb7cdfc8267be2df5d5f39eb5.tar.gz",
+            "sha256": "9d76c963d70b19b48ffcbbf2acaee529fb1ec9c53cf0c1f1884f65b2c860bc1f"
+        }
+    ]
+}

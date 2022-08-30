@@ -1,7 +1,6 @@
-data/org.igorgue.NvimPythonUI.desktop.in
-data/org.igorgue.NvimPythonUI.appdata.xml.in
-data/org.igorgue.NvimPythonUI.gschema.xml
-src/window.ui
+data/org.igorgue.NeoWaita.desktop.in
+data/org.igorgue.NeoWaita.appdata.xml.in
+data/org.igorgue.NeoWaita.gschema.xml
 src/main.py
 src/window.py
-
+src/window.ui

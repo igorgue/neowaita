@@ -1,9 +1,9 @@
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
-moduledir = join_paths(pkgdatadir, 'nvim_python_ui')
+moduledir = join_paths(pkgdatadir, 'neowaita')
 gnome = import('gnome')
 
-gnome.compile_resources('nvim-python-ui',
-  'nvim_python_ui.gresource.xml',
+gnome.compile_resources('neowaita',
+  'neowaita.gresource.xml',
   gresource_bundle: true,
   install: true,
   install_dir: pkgdatadir,
@@ -18,17 +18,18 @@ conf.set('localedir', join_paths(get_option('prefix'), get_option('localedir')))
 conf.set('pkgdatadir', pkgdatadir)
 
 configure_file(
-  input: 'nvim-python-ui.in',
-  output: 'nvim-python-ui',
+  input: 'neowaita.in',
+  output: 'neowaita',
   configuration: conf,
   install: true,
   install_dir: get_option('bindir')
 )
 
-nvim_python_ui_sources = [
+neowaita_sources = [
   '__init__.py',
   'main.py',
   'window.py',
+  'utils.py',
 ]
 
-install_data(nvim_python_ui_sources, install_dir: moduledir)
+install_data(neowaita_sources, install_dir: moduledir)

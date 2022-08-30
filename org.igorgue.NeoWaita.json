@@ -1,0 +1,44 @@
+{
+    "app-id" : "org.igorgue.NeoWaita",
+    "runtime" : "org.gnome.Platform",
+    "runtime-version" : "master",
+    "sdk" : "org.gnome.Sdk",
+    "command" : "neowaita",
+    "finish-args" : [
+        "--filesystem=home:rw",
+        "--share=network",
+        "--filesystem=xdg-config/gtk-4.0",
+        "--filesystem=xdg-config/gtk-3.0",
+        "--share=ipc",
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--device=dri",
+        "--talk-name=org.freedesktop.Flatpak"
+    ],
+    "cleanup" : [
+        "/include",
+        "/lib/pkgconfig",
+        "/man",
+        "/share/doc",
+        "/share/gtk-doc",
+        "/share/man",
+        "/share/pkgconfig",
+        "*.la",
+        "*.a"
+    ],
+    "modules" : [
+        "python3-pynvim.json",
+        "vte-gtk4.json",
+        {
+            "name" : "neowaita",
+            "builddir" : true,
+            "buildsystem" : "meson",
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/igorgue/neowaita"
+                }
+            ]
+        }
+    ]
+}

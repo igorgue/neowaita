@@ -1,1 +1,1 @@
-i18n.gettext('nvim-python-ui', preset: 'glib')
+i18n.gettext('neowaita', preset: 'glib')

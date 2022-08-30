@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=nvim-python-ui
-Exec=nvim-python-ui
-Icon=org.igorgue.NvimPythonUI
+Name=neowaita
+Exec=neowaita
+Icon=org.igorgue.NeoWaita
 Terminal=false
 Type=Application
 Categories=GTK;
