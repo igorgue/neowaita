@@ -5,15 +5,11 @@
     "sdk" : "org.gnome.Sdk",
     "command" : "neowaita",
     "finish-args" : [
-        "--filesystem=home:rw",
-        "--share=network",
-        "--filesystem=xdg-config/gtk-4.0",
-        "--filesystem=xdg-config/gtk-3.0",
+        "--filesystem=home:ro",
         "--share=ipc",
         "--socket=fallback-x11",
         "--socket=wayland",
         "--device=dri",
-        "--talk-name=org.freedesktop.Flatpak"
     ],
     "cleanup" : [
         "/include",

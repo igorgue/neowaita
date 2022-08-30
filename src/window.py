@@ -39,15 +39,16 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'NeowaitaWindow'
 
     pid = -1
-    pty = Vte.Pty.new_sync(Vte.PtyFlags.NO_CTTY)
+    pty = Vte.Pty.new_sync(Vte.PtyFlags.DEFAULT)
 
     command = ["/bin/env", "nvim", "--listen", get_socket_file()]
-    default_font = "Monospace 14"
+    default_font = "Iosevka 14"
 
     terminal = Gtk.Template.Child()
     terminal_box = Gtk.Template.Child()
 
     cancellable = Gio.Cancellable.new()
+    css_provider = Gtk.CssProvider().load_from_resource("/org/igorgue/NeoWaita/resources/style.css")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -55,10 +56,12 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         assert self.terminal
         assert self.terminal_box
 
+        # FIXME CSS
+        ## Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
         self.terminal.set_pty(self.pty)
         self.terminal.set_color_background(Gdk.RGBA())
         self.terminal.set_font(Pango.FontDescription.from_string(self.default_font))
-        self.terminal.set_rewrap_on_resize(True)
 
         self.cancellable.connect(self.pty_cancelled)
 
@@ -95,7 +98,6 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         self.nvim.ui_attach(self.box_width, self.box_height)
 
         self.connect("notify", self.notified)
-        self.connect("destroy", self.destroyed)
         self.terminal.grab_focus()
 
     def pty_cancelled(self, pty):
@@ -108,12 +110,6 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     def notified(self, app, param):
         if param.name in ["default-width", "default-height", "maximized"]:
             self.resized()
-
-        print(param.name)
-
-    def destroyed(self):
-        print('destroyed')
-        self.nvim.close()
 
     def resized(self):
         self.nvim.ui_try_resize(self.box_width, self.box_height)

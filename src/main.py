@@ -32,17 +32,21 @@ import sys
 import gi
 
 gi.require_version('Gtk', '4.0')
+gi.require_version('Gdk', '4.0')
 gi.require_version('Adw', '1')
 gi.require_version('Vte', '3.91')
 
-from gi.repository import Adw, Gtk, Gio, GObject, Vte
+from gi.repository import Adw, Gtk, Gdk, Gio, GObject, Vte
 
 from .window import NeowaitaWindow
+from .utils import clean_socket
 
 
 GObject.type_register(Vte.Terminal)
 class NeowaitaApplication(Adw.Application):
     """The main application singleton class."""
+
+    win: NeowaitaWindow
 
     def __init__(self):
         super().__init__(application_id='org.igorgue.NeoWaita',
@@ -57,10 +61,22 @@ class NeowaitaApplication(Adw.Application):
         We raise the application's main window, creating it if
         necessary.
         """
-        win = self.props.active_window
-        if not win:
-            win = NeowaitaWindow(application=self)
-        win.present()
+        self.win = self.props.active_window
+
+        if not self.win:
+            self.win = NeowaitaWindow(application=self)
+
+        self.win.present()
+
+    def do_shutdown(self):
+        quit(self.win)
+
+    def quit(self, widget, _):
+        self.win.nvim.quit()
+        self.win.nvim.ui_detach()
+        self.win.nvim.close()
+
+        Adw.Application.do_shutdown(self)
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
