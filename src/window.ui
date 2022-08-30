@@ -29,7 +29,6 @@
                 <property name="vexpand">true</property>
                 <property name="halign">fill</property>
                 <property name="valign">fill</property>
-                <property name="rewrap_on_resize">true</property>
               </object>
             </child>
           </object>
@@ -54,3 +53,4 @@
     </section>
   </menu>
 </interface>
+

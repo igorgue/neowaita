@@ -39,7 +39,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'NeowaitaWindow'
 
     pid = -1
-    pty = Vte.Pty.new_sync(Vte.PtyFlags.DEFAULT)
+    pty = Vte.Pty.new_sync(Vte.PtyFlags.NO_CTTY)
 
     command = ["/bin/env", "nvim", "--listen", get_socket_file()]
     default_font = "Iosevka 14"
@@ -101,7 +101,8 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         self.terminal.grab_focus()
 
     def pty_cancelled(self, pty):
-        print("pty cancelled... TODO reconnection or error page")
+        # TODO pty cancelled... TODO reconnection or error page")
+        pass
 
     def terminal_done(self, terminal, error):
         self.nvim.close()
