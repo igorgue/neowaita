@@ -2,6 +2,6 @@
 <gresources>
   <gresource prefix="/org/igorgue/NeoWaita">
     <file preprocess="xml-stripblanks">window.ui</file>
-    <file>resources/style.css</file>
+    <file alias="style.css">resources/style.css</file>
   </gresource>
 </gresources>

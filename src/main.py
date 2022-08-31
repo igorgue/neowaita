@@ -31,29 +31,29 @@
 import sys
 import gi
 
-gi.require_version('Gtk', '4.0')
-gi.require_version('Gdk', '4.0')
-gi.require_version('Adw', '1')
-gi.require_version('Vte', '3.91')
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+gi.require_version("Vte", "3.91")
 
-from gi.repository import Adw, Gtk, Gdk, Gio, GObject, Vte
+from gi.repository import Adw, Gio, GObject, Vte
 
 from .window import NeowaitaWindow
-from .utils import clean_socket
-
+from .utils import LICENSE, clean_socket
 
 GObject.type_register(Vte.Terminal)
+
 class NeowaitaApplication(Adw.Application):
     """The main application singleton class."""
 
     win: NeowaitaWindow
 
     def __init__(self):
-        super().__init__(application_id='org.igorgue.NeoWaita',
+        super().__init__(application_id="org.igorgue.NeoWaita",
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
-        self.create_action('quit', self.quit, ['<primary>q'])
-        self.create_action('about', self.on_about_action)
-        self.create_action('preferences', self.on_preferences_action)
+
+        self.create_action("quit", self.quit, ["<primary>q"])
+        self.create_action("about", self.on_about_action)
+        self.create_action("preferences", self.on_preferences_action)
 
     def do_activate(self):
         """Called when the application is activated.
@@ -68,30 +68,31 @@ class NeowaitaApplication(Adw.Application):
 
         self.win.present()
 
+
     def do_shutdown(self):
         quit(self.win)
 
     def quit(self, widget, _):
-        self.win.nvim.quit()
         self.win.nvim.ui_detach()
-        self.win.nvim.close()
+
+        clean_socket()
 
         Adw.Application.do_shutdown(self)
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
         about = Adw.AboutWindow(transient_for=self.props.active_window,
-                                application_name='neowaita',
-                                application_icon='org.igorgue.NeoWaita',
-                                developer_name='Igor',
-                                version='0.1.0',
-                                developers=['Igor'],
-                                copyright='© 2022 Igor')
+                                application_name="neowaita",
+                                application_icon="org.igorgue.NeoWaita",
+                                developer_name="Igor Guerrero",
+                                version="0.1.0",
+                                developers=["Igor Guerrero - igorgue@protonmail.com"],
+                                copyright=LICENSE)
         about.present()
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
-        print('app.preferences action activated')
+        print("app.preferences action activated")
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.
@@ -111,5 +112,4 @@ class NeowaitaApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
-    app = NeowaitaApplication()
-    return app.run(sys.argv)
+    return NeowaitaApplication().run(sys.argv)

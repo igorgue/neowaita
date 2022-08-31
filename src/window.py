@@ -29,7 +29,7 @@
 # SPDX-License-Identifier: MIT
 import pynvim
 
-from gi.repository import Gtk, Gio, Adw, Pango, Gdk, GLib, Vte, Gdk
+from gi.repository import Gtk, Gio, Adw, Pango, Gdk, GLib, Vte
 
 from .utils import is_flatpak, get_socket_file, clean_socket
 
@@ -48,16 +48,12 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     terminal_box = Gtk.Template.Child()
 
     cancellable = Gio.Cancellable.new()
-    css_provider = Gtk.CssProvider().load_from_resource("/org/igorgue/NeoWaita/resources/style.css")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         assert self.terminal
         assert self.terminal_box
-
-        # FIXME CSS
-        ## Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         self.terminal.set_pty(self.pty)
         self.terminal.set_color_background(Gdk.RGBA())

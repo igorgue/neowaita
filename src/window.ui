@@ -6,6 +6,7 @@
   <template class="NeowaitaWindow" parent="AdwApplicationWindow">
     <property name="default-width">800</property>
     <property name="default-height">600</property>
+    <property name="title"></property>
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
