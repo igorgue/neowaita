@@ -47,6 +47,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     terminal = Gtk.Template.Child()
     terminal_box = Gtk.Template.Child()
     revealer = Gtk.Template.Child()
+    overlay = Gtk.Template.Child()
 
     cancellable = Gio.Cancellable.new()
     event_controller_motion = Gtk.EventControllerMotion()
@@ -57,8 +58,8 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         assert self.terminal
         assert self.terminal_box
 
-        self.event_controller_motion.connect("motion", self.terminal_box_motioned)
-        self.terminal_box.add_controller(self.event_controller_motion)
+        self.event_controller_motion.connect("motion", self.overlay_motioned)
+        self.overlay.add_controller(self.event_controller_motion)
 
         self.terminal.set_pty(self.pty)
         self.terminal.set_color_background(Gdk.RGBA())
@@ -88,15 +89,22 @@ class NeowaitaWindow(Adw.ApplicationWindow):
             self.pty_ready
         )
 
-    def terminal_box_motioned(self, _, x, y):
+    def overlay_motioned(self, _, x, y):
         visible = False
-        if y < 25:
+        if y < 40:
             visible = True
 
-        print('will change')
+        if visible:
+            def do_set_visible() -> bool:
+                self.revealer.set_visible(True)
+                self.revealer.set_reveal_child(True)
 
-        # self.revealer.set_visible(visible)
-        self.revealer.set_reveal_child(visible)
+                return False
+
+            GLib.timeout_add(666, do_set_visible)
+        else:
+            self.revealer.set_visible(False)
+            self.revealer.set_reveal_child(False)
 
     def pty_ready(self, pty, task):
         _, self.pid = pty.spawn_finish(task)
