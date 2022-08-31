@@ -94,17 +94,25 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         if y < 40:
             visible = True
 
-        if visible:
-            def do_set_visible() -> bool:
-                self.revealer.set_visible(True)
-                self.revealer.set_reveal_child(True)
+        # style_context = self.get_style_context()
 
-                return False
-
-            GLib.timeout_add(666, do_set_visible)
-        else:
+        if not visible:
             self.revealer.set_visible(False)
             self.revealer.set_reveal_child(False)
+
+            # style_context.remove_class("gradient-top")
+
+            return
+
+        def do_set_visible() -> bool:
+            self.revealer.set_visible(True)
+            self.revealer.set_reveal_child(True)
+
+            # style_context.add_class("gradient-top")
+
+            return False
+
+        GLib.timeout_add(666, do_set_visible)
 
     def pty_ready(self, pty, task):
         _, self.pid = pty.spawn_finish(task)

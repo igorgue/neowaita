@@ -1,4 +1,5 @@
 headerbar {
+  background: transparent;
   box-shadow: none;
   background-image: linear-gradient(180deg, darker(@borders), @headerbar_bg_color 47%);
 }
