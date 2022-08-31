@@ -11,11 +11,24 @@
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <child>
-          <object class="AdwHeaderBar">
-            <child type="end">
-              <object class="GtkMenuButton">
-                <property name="icon-name">open-menu-symbolic</property>
-                <property name="menu-model">primary_menu</property>
+          <object class="GtkOverlay" id="overlay">
+            <property name="visible">true</property>
+            <property name="can_focus">false</property>
+            <child>
+              <object class="GtkRevealer" id="revealer">
+                <property name="visible">false</property>
+                <property name="transition-duration">666</property>
+                <property name="transition-type">crossfade</property>
+                <child>
+                  <object class="AdwHeaderBar">
+                    <child type="end">
+                      <object class="GtkMenuButton">
+                        <property name="icon-name">open-menu-symbolic</property>
+                        <property name="menu-model">primary_menu</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

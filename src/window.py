@@ -46,14 +46,19 @@ class NeowaitaWindow(Adw.ApplicationWindow):
 
     terminal = Gtk.Template.Child()
     terminal_box = Gtk.Template.Child()
+    revealer = Gtk.Template.Child()
 
     cancellable = Gio.Cancellable.new()
+    event_controller_motion = Gtk.EventControllerMotion()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         assert self.terminal
         assert self.terminal_box
+
+        self.event_controller_motion.connect("motion", self.terminal_box_motioned)
+        self.terminal_box.add_controller(self.event_controller_motion)
 
         self.terminal.set_pty(self.pty)
         self.terminal.set_color_background(Gdk.RGBA())
@@ -83,6 +88,15 @@ class NeowaitaWindow(Adw.ApplicationWindow):
             self.pty_ready
         )
 
+    def terminal_box_motioned(self, _, x, y):
+        visible = False
+        if y < 25:
+            visible = True
+
+        print('will change')
+
+        # self.revealer.set_visible(visible)
+        self.revealer.set_reveal_child(visible)
 
     def pty_ready(self, pty, task):
         _, self.pid = pty.spawn_finish(task)
@@ -107,6 +121,8 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     def notified(self, app, param):
         if param.name in ["default-width", "default-height", "maximized"]:
             self.resized()
+
+        print(param.name)
 
     def resized(self):
         self.nvim.ui_try_resize(self.box_width, self.box_height)

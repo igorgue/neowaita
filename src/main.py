@@ -75,6 +75,8 @@ class NeowaitaApplication(Adw.Application):
     def quit(self, widget, _):
         self.win.nvim.ui_detach()
 
+        # TODO Figure out closing errors on neovim
+
         clean_socket()
 
         Adw.Application.do_shutdown(self)
