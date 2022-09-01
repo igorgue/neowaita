@@ -47,6 +47,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     terminal = Gtk.Template.Child()
     terminal_box = Gtk.Template.Child()
     revealer = Gtk.Template.Child()
+    headerbar = Gtk.Template.Child()
     overlay = Gtk.Template.Child()
 
     cancellable = Gio.Cancellable.new()
@@ -59,6 +60,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         assert self.terminal_box
 
         self.event_controller_motion.connect("motion", self.overlay_motioned)
+        # self.event_controller_motion.connect("leave", self.overlay_leave)
         self.overlay.add_controller(self.event_controller_motion)
 
         self.terminal.set_pty(self.pty)
@@ -90,29 +92,25 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         )
 
     def overlay_motioned(self, _, x, y):
-        visible = False
-        if y < 40:
-            visible = True
+        is_visible = y < self.headerbar.get_allocation().height
 
-        # style_context = self.get_style_context()
-
-        if not visible:
-            self.revealer.set_visible(False)
-            self.revealer.set_reveal_child(False)
-
-            # style_context.remove_class("gradient-top")
-
+        if is_visible:
+            self.do_set_revealer_visible(True)
             return
 
-        def do_set_visible() -> bool:
-            self.revealer.set_visible(True)
-            self.revealer.set_reveal_child(True)
+        # GLib.timeout_add(666, lambda: self.do_set_revealer_visible(False))
+        self.do_set_revealer_visible(False)
 
-            # style_context.add_class("gradient-top")
+    def overlay_leave(self, _):
+        # self.do_set_revealer_visible(False)
+        pass
 
-            return False
 
-        GLib.timeout_add(666, do_set_visible)
+    def do_set_revealer_visible(self, visible: bool) -> bool:
+        self.revealer.set_visible(visible)
+        self.revealer.set_reveal_child(visible)
+
+        return False
 
     def pty_ready(self, pty, task):
         _, self.pid = pty.spawn_finish(task)
@@ -137,8 +135,6 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     def notified(self, app, param):
         if param.name in ["default-width", "default-height", "maximized"]:
             self.resized()
-
-        print(param.name)
 
     def resized(self):
         self.nvim.ui_try_resize(self.box_width, self.box_height)

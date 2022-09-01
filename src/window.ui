@@ -28,10 +28,10 @@
         <child type="overlay">
           <object class="GtkRevealer" id="revealer">
             <property name="visible">true</property>
-            <property name="transition-duration">666</property>
-            <property name="transition-type">crossfade</property>
+            <property name="transition-duration">314.16</property>
+            <property name="transition-type">slide-down</property>
             <child>
-              <object class="AdwHeaderBar">
+              <object class="AdwHeaderBar" id="headerbar">
                 <property name="hexpand">true</property>
                 <property name="halign">fill</property>
                 <property name="valign">start</property>

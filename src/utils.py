@@ -30,15 +30,15 @@ def _get_socket_file(n: int = 0) -> str:
     sufix = "" if n == 0 else f"-{n}"
     socket_file = path.join(home, f"neowaita{sufix}.socket")
 
-    if path.exists(socket_file) and not stat.S_ISFIFO(os.stat(socket_file).st_mode):
-        print("in use")
+    if path.exists(socket_file) and stat.S_ISFIFO(os.stat(socket_file).st_mode):
+        print(f"[get_socket_file] {socket_file} in use")
         n += 1
 
         socket_file = None
         return _get_socket_file(n + 1)
-    else:
-        print("not in use")
-        return socket_file
+
+    print(f"[get_socket_file] {socket_file} not in use")
+    return socket_file
 
 def _get_home() -> str:
     return path.expanduser("~")
