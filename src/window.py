@@ -45,7 +45,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'NeowaitaWindow'
 
     pid = -1
-    pty = Vte.Pty()
+    pty = Vte.Pty.new_sync(Vte.PtyFlags.NO_CTTY)
 
     command = ["/bin/env", "nvim", "--listen", get_socket_file()]
     default_font = "Iosevka 14"
@@ -65,7 +65,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         super().__init__(**kwargs)
 
         self.event_controller_motion.connect("motion", self.overlay_motioned)
-        self.overlay.add_controller(self.event_controller_motion)
+        self.terminal.add_controller(self.event_controller_motion)
 
         self.terminal.set_pty(self.pty)
         self.terminal.set_color_background(Gdk.RGBA())
