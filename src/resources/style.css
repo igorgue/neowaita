@@ -1,10 +1,25 @@
 headerbar {
-  background: transparent;
-  box-shadow: none;
-  background-image: linear-gradient(180deg, darker(@borders), transparent 31.16%);
+  background-image: linear-gradient(180deg, darker(@borders), transparent 31.41%);
 }
 
 headerbar:backdrop windowhandle {
   filter: none;
+  background-color: @window_bg_color;
+  background-image: linear-gradient(180deg, darker(darker(@borders)), transparent 31.41%);
+}
+
+.terminal-box {
   background: @window_bg_color;
+}
+
+button {
+  color: @window_fg_color;
+}
+
+label {
+  color: @window_fg_color;
+}
+
+window {
+  background-color: @window_bg_color;
 }

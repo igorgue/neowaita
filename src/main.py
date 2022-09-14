@@ -83,7 +83,7 @@ class NeowaitaApplication(Adw.Application):
 
     def on_about_action(self, widget, _):
         """Callback for the app.about action."""
-        about = Adw.AboutWindow(transient_for=self.props.active_window,
+        about = Adw.AboutWindow(transient_for=self.win,
                                 application_name="neowaita",
                                 application_icon="org.igorgue.NeoWaita",
                                 developer_name="Igor Guerrero",

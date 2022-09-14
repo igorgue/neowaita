@@ -4,23 +4,29 @@
    <requires lib="Adw" version="1.0" />
    <requires lib="Vte" version="3.91" />
   <template class="NeowaitaWindow" parent="AdwApplicationWindow">
-    <property name="default-width">800</property>
+    <property name="default-width">900</property>
     <property name="default-height">600</property>
-    <property name="title"></property>
+    <property name="title">NeoWaita</property>
     <child>
       <object class="GtkOverlay" id="overlay">
         <property name="visible">true</property>
+        <property name="can-target">false</property>
         <child>
           <object class="GtkBox" id="terminal_box">
             <property name="visible">true</property>
             <property name="hexpand">true</property>
             <property name="vexpand">true</property>
+            <property name="can-target">false</property>
+            <style>
+              <class name="terminal-box" />
+            </style>
             <child>
               <object class="VteTerminal" id="terminal">
                 <property name="hexpand">true</property>
                 <property name="vexpand">true</property>
                 <property name="halign">fill</property>
                 <property name="valign">fill</property>
+                <property name="input-enabled">true</property>
               </object>
             </child>
           </object>
@@ -35,6 +41,25 @@
                 <property name="hexpand">true</property>
                 <property name="halign">fill</property>
                 <property name="valign">start</property>
+                <style>
+                  <class name="flat" />
+                </style>
+                <child type="start">
+                  <object class="GtkButton" id="new_tab_button">
+                    <property name="icon-name">tab-new-symbolic</property>
+                  </object>
+                </child>
+                <child type="title">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">TODO - GtkNeovimTabBar</property>
+                    <property name="single-line-mode">True</property>
+                    <property name="ellipsize">end</property>
+                    <property name="width-chars">5</property>
+                    <style>
+                      <class name="title"/>
+                    </style>
+                  </object>
+                </child>
                 <child type="end">
                   <object class="GtkMenuButton">
                     <property name="icon-name">open-menu-symbolic</property>
