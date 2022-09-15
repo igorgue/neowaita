@@ -51,11 +51,10 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     default_font = "Iosevka 14"
 
     terminal: Vte.Terminal = Gtk.Template.Child()
-    terminal_box: Gtk.Box = Gtk.Template.Child()
-    # revealer = Gtk.Template.Child()
-    # headerbar = Gtk.Template.Child()
-    # overlay = Gtk.Template.Child()
-    # new_tab_button = Gtk.Template.Child()
+    revealer = Gtk.Template.Child()
+    headerbar = Gtk.Template.Child()
+    overlay = Gtk.Template.Child()
+    new_tab_button = Gtk.Template.Child()
 
     cancellable = Gio.Cancellable.new()
     pty = Vte.Pty()
@@ -69,13 +68,6 @@ class NeowaitaWindow(Adw.ApplicationWindow):
 
         self.settings.set_property("gtk-double-click-distance", 0)
         self.settings.set_property("gtk-double-click-time", 800)
-
-        self.css_provider.load_from_resource("/org/igorgue/NeoWaita/style.css")
-        Gtk.StyleContext.add_provider_for_display(
-            Gdk.Display.get_default(),
-            self.css_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
 
         self.terminal.set_pty(self.pty)
         self.terminal.set_font(Pango.FontDescription.from_string(self.default_font))
@@ -92,9 +84,6 @@ class NeowaitaWindow(Adw.ApplicationWindow):
 
         self.terminal.connect("window-title-changed", self.on_terminal_window_title_changed)
 
-        # self.event_controller_motion.connect("motion", self.on_motion)
-        self.terminal.add_controller(self.event_controller_motion)
-
         if is_flatpak():
             self.command = [
                 "/usr/bin/flatpak-spawn",
@@ -106,7 +95,8 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         clean_socket()
 
         self.event_controller_motion.connect("motion", self.overlay_motioned)
-        self.terminal.add_controller(self.event_controller_motion)
+
+        self.add_controller(self.event_controller_motion)
 
         self.terminal.set_pty(self.pty)
         self.terminal.set_color_background(Gdk.RGBA())
@@ -128,7 +118,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
             None
         )
 
-        # self.new_tab_button.connect("clicked", self.new_tab_clicked)
+        self.new_tab_button.connect("clicked", self.new_tab_clicked)
 
         style_context = self.get_style_context()
         display = Gdk.Display.get_default()
@@ -136,8 +126,8 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         style_context.add_provider_for_display(display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def overlay_motioned(self, _, *cords):
-        print(cords)
-        # self.revealer.set_reveal_child(cords[1] < 40)
+        self.revealer.set_visible(cords[1] < 40)
+        self.revealer.set_reveal_child(cords[1] < 40)
 
     def pty_ready(self, terminal, pid, *_):
         self.pid = pid
@@ -214,10 +204,6 @@ class NeowaitaWindow(Adw.ApplicationWindow):
               background-image: linear-gradient(180deg, darker(darker({bg2})), transparent 31.41%);
             }}
 
-            .terminal-box {{
-              background: {bg1};
-            }}
-
             button {{
               color: {fg2};
             }}
@@ -270,14 +256,10 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     def win_width(self):
         w = self.get_allocated_width()
 
-        print(w)
-
         return w if w > 0 else self.props.default_width
 
     @property
     def win_height(self):
         h = self.get_allocated_height()
-
-        print(h)
 
         return h if h > 0 else self.props.default_height

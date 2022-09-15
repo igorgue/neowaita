@@ -95,7 +95,7 @@ class NeowaitaApplication(Adw.Application):
 
     def on_preferences_action(self, widget, _):
         """Callback for the app.preferences action."""
-        print("app.preferences action activated")
+        print(f"app.preferences action activated: {widget=}")
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.

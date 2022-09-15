@@ -8,16 +8,12 @@ headerbar:backdrop windowhandle {
   background-image: linear-gradient(180deg, darker(darker(@borders)), transparent 31.41%);
 }
 
-.terminal-box {
-  background: @window_bg_color;
-}
-
 button {
   color: @window_fg_color;
 }
 
 label {
-  color: @window_fg_color;
+  color: red;
 }
 
 window {

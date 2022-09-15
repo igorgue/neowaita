@@ -6,78 +6,52 @@
   <template class="NeowaitaWindow" parent="AdwApplicationWindow">
     <property name="title">NeoWaita</property>
     <child>
-      <object class="GtkBox" id="terminal_box">
-        <!--<property name="margin-top">6</property>-->
-        <!--<property name="margin-bottom">6</property>-->
+      <object class="GtkOverlay" id="overlay">
         <child>
           <object class="VteTerminal" id="terminal">
             <property name="hexpand">true</property>
           </object>
         </child>
+        <child type="overlay">
+          <object class="GtkRevealer" id="revealer">
+            <property name="visible">false</property>
+            <property name="transition-duration">314.16</property>
+            <property name="transition-type">slide-down</property>
+            <child>
+              <object class="AdwHeaderBar" id="headerbar">
+                <property name="hexpand">true</property>
+                <property name="halign">fill</property>
+                <property name="valign">start</property>
+                <style>
+                  <class name="flat" />
+                </style>
+                <child type="start">
+                  <object class="GtkButton" id="new_tab_button">
+                    <property name="icon-name">tab-new-symbolic</property>
+                  </object>
+                </child>
+                <child type="title">
+                  <object class="GtkLabel">
+                    <property name="label" translatable="yes">TODO - GtkNeovimTabBar</property>
+                    <property name="single-line-mode">True</property>
+                    <property name="ellipsize">end</property>
+                    <property name="width-chars">5</property>
+                    <style>
+                      <class name="title" />
+                    </style>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkMenuButton">
+                    <property name="icon-name">open-menu-symbolic</property>
+                    <property name="menu-model">primary_menu</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
-      <!--<object class="GtkOverlay" id="overlay">-->
-        <!--<property name="visible">true</property>-->
-        <!--<property name="can-target">false</property>-->
-        <!--<child>-->
-          <!--<object class="GtkBox" id="terminal_box">-->
-            <!--<property name="visible">true</property>-->
-            <!--<property name="hexpand">true</property>-->
-            <!--<property name="vexpand">true</property>-->
-            <!--<property name="can-target">false</property>-->
-            <!--<style>-->
-              <!--<class name="terminal-box" />-->
-            <!--</style>-->
-            <!--<child>-->
-              <!--<object class="VteTerminal" id="terminal">-->
-                <!--<property name="hexpand">true</property>-->
-                <!--<property name="vexpand">true</property>-->
-                <!--<property name="halign">fill</property>-->
-                <!--<property name="valign">fill</property>-->
-                <!--<property name="input-enabled">true</property>-->
-              <!--</object>-->
-            <!--</child>-->
-          <!--</object>-->
-        <!--</child>-->
-        <!--<child type="overlay">-->
-          <!--<object class="GtkRevealer" id="revealer">-->
-            <!--<property name="visible">true</property>-->
-            <!--<property name="transition-duration">314.16</property>-->
-            <!--<property name="transition-type">slide-down</property>-->
-            <!--<child>-->
-              <!--<object class="AdwHeaderBar" id="headerbar">-->
-                <!--<property name="hexpand">true</property>-->
-                <!--<property name="halign">fill</property>-->
-                <!--<property name="valign">start</property>-->
-                <!--<style>-->
-                  <!--<class name="flat" />-->
-                <!--</style>-->
-                <!--<child type="start">-->
-                  <!--<object class="GtkButton" id="new_tab_button">-->
-                    <!--<property name="icon-name">tab-new-symbolic</property>-->
-                  <!--</object>-->
-                <!--</child>-->
-                <!--<child type="title">-->
-                  <!--<object class="GtkLabel">-->
-                    <!--<property name="label" translatable="yes">TODO - GtkNeovimTabBar</property>-->
-                    <!--<property name="single-line-mode">True</property>-->
-                    <!--<property name="ellipsize">end</property>-->
-                    <!--<property name="width-chars">5</property>-->
-                    <!--<style>-->
-                      <!--<class name="title"/>-->
-                    <!--</style>-->
-                  <!--</object>-->
-                <!--</child>-->
-                <!--<child type="end">-->
-                  <!--<object class="GtkMenuButton">-->
-                    <!--<property name="icon-name">open-menu-symbolic</property>-->
-                    <!--<property name="menu-model">primary_menu</property>-->
-                  <!--</object>-->
-                <!--</child>-->
-              <!--</object>-->
-            <!--</child>-->
-          <!--</object>-->
-        <!--</child>-->
-      <!--</object>-->
     </child>
   </template>
   <menu id="primary_menu">
