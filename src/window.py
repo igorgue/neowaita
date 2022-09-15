@@ -45,40 +45,55 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'NeowaitaWindow'
 
     pid = -1
-    pty = Vte.Pty.new_sync(Vte.PtyFlags.NO_CTTY)
 
     command = ["/bin/env", "nvim", "--listen", get_socket_file()]
+    env = []
     default_font = "Iosevka 14"
 
-    terminal = Gtk.Template.Child()
-    terminal_box = Gtk.Template.Child()
-    revealer = Gtk.Template.Child()
-    headerbar = Gtk.Template.Child()
-    overlay = Gtk.Template.Child()
-    new_tab_button = Gtk.Template.Child()
+    terminal: Vte.Terminal = Gtk.Template.Child()
+    terminal_box: Gtk.Box = Gtk.Template.Child()
+    # revealer = Gtk.Template.Child()
+    # headerbar = Gtk.Template.Child()
+    # overlay = Gtk.Template.Child()
+    # new_tab_button = Gtk.Template.Child()
 
     cancellable = Gio.Cancellable.new()
+    pty = Vte.Pty()
     event_controller_motion = Gtk.EventControllerMotion()
     css_provider = Gtk.CssProvider()
+    settings = Gtk.Settings.get_default()
+    cwd = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.event_controller_motion.connect("motion", self.overlay_motioned)
-        self.terminal.add_controller(self.event_controller_motion)
+        self.settings.set_property("gtk-double-click-distance", 0)
+        self.settings.set_property("gtk-double-click-time", 800)
+
+        self.css_provider.load_from_resource("/org/igorgue/NeoWaita/style.css")
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            self.css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
         self.terminal.set_pty(self.pty)
-        self.terminal.set_color_background(Gdk.RGBA())
         self.terminal.set_font(Pango.FontDescription.from_string(self.default_font))
+        self.terminal.set_size(80, 24)
+        self.terminal.set_cursor_blink_mode(Vte.CursorBlinkMode.SYSTEM)
+        self.terminal.set_cursor_shape(Vte.CursorShape.BLOCK)
+        self.terminal.set_scrollback_lines(-1)
+        self.terminal.set_audible_bell(False)
+        self.terminal.set_mouse_autohide(True)
+        self.terminal.set_rewrap_on_resize(True)
+        self.terminal.set_scroll_on_output(True)
+        self.terminal.set_scroll_on_keystroke(True)
+        self.terminal.set_allow_bold(True)
 
-        self.cancellable.connect(self.pty_cancelled)
+        self.terminal.connect("window-title-changed", self.on_terminal_window_title_changed)
 
-        self.new_tab_button.connect("clicked", self.new_tab_clicked)
-
-        style_context = self.get_style_context()
-        display = Gdk.Display.get_default()
-
-        style_context.add_provider_for_display(display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        # self.event_controller_motion.connect("motion", self.on_motion)
+        self.terminal.add_controller(self.event_controller_motion)
 
         if is_flatpak():
             self.command = [
@@ -90,31 +105,51 @@ class NeowaitaWindow(Adw.ApplicationWindow):
 
         clean_socket()
 
-        self.pty.spawn_async(
-            None,
+        self.event_controller_motion.connect("motion", self.overlay_motioned)
+        self.terminal.add_controller(self.event_controller_motion)
+
+        self.terminal.set_pty(self.pty)
+        self.terminal.set_color_background(Gdk.RGBA())
+        self.terminal.set_font(Pango.FontDescription.from_string(self.default_font))
+
+        self.cancellable.connect(self.pty_cancelled)
+
+        self.terminal.spawn_async(
+            Vte.PtyFlags.NO_CTTY,
+            self.cwd,
             self.command,
-            None,
+            self.env,
             GLib.SpawnFlags.DEFAULT,
             None,
             None,
-            -1,
+            self.pid,
             self.cancellable,
-            self.pty_ready
+            self.pty_ready,
+            None
         )
+
+        # self.new_tab_button.connect("clicked", self.new_tab_clicked)
+
+        style_context = self.get_style_context()
+        display = Gdk.Display.get_default()
+
+        style_context.add_provider_for_display(display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def overlay_motioned(self, _, *cords):
         print(cords)
-        self.revealer.set_reveal_child(cords[1] < 40)
+        # self.revealer.set_reveal_child(cords[1] < 40)
 
-    def pty_ready(self, pty, task):
-        _, self.pid = pty.spawn_finish(task)
+    def pty_ready(self, terminal, pid, *_):
+        self.pid = pid
+
+        self.terminal = terminal
 
         self.terminal.watch_child(self.pid)
         self.terminal.connect("child-exited", self.terminal_done)
 
         self.nvim = pynvim.attach("socket", path=get_socket_file())
         self.cid = self.nvim.channel_id
-        self.nvim.ui_attach(self.box_width, self.box_height)
+        self.nvim.ui_attach(self.win_width, self.win_height)
 
         self.setup_nvim_loop()
 
@@ -129,7 +164,9 @@ class NeowaitaWindow(Adw.ApplicationWindow):
 
             self.overide_css_from_colorscheme()
 
-        def request_cb(*_):
+        def request_cb(*args):
+            print(f"request_cb: {args}")
+
             pass
 
         def notification_cb(name, _):
@@ -149,7 +186,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
 
     def overide_css_from_colorscheme(self):
         self.nvim.command("let g:neowaita_fg1 = synIDattr(synIDtrans(hlID('Normal')), 'fg#')")
-        self.nvim.command("let g:neowaita_fg2 = synIDattr(synIDtrans(hlID('CursorLine')), 'fg#')")
+        self.nvim.command("let g:neowaita_fg2 = synIDattr(synIDtrans(hlID('PMenu')), 'fg#')")
         self.nvim.command("let g:neowaita_bg1 = synIDattr(synIDtrans(hlID('Normal')), 'bg#')")
         self.nvim.command("let g:neowaita_bg2 = synIDattr(synIDtrans(hlID('CursorLine')), 'bg#')")
 
@@ -159,6 +196,11 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         bg2 = self.nvim.vars["neowaita_bg2"]
 
         self.overide_css(fg1, fg2, bg1, bg2)
+
+    def on_terminal_window_title_changed(self, *args):
+        print(f"on_terminal_window_title_changed {args}")
+
+        pass
 
     def overide_css(self, fg1, fg2, bg1, bg2):
         tpl = f"""
@@ -194,9 +236,10 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         self.css_provider.load_from_data(css)
 
 
-    def pty_cancelled(self, _):
-        # TODO pty cancelled... Please restart NVIM with a button on an error page?
-        pass
+    def pty_cancelled(self, *args):
+        print(f"pty_cancelled {args}")
+
+        self.terminal_done()
 
     def random_color_hex(self):
         return f"#{random.randint(0, 0xffffff):06x}"
@@ -204,6 +247,10 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     def new_tab_clicked(self, _):
         self.nvim.async_call(lambda: self.nvim.command("tabnew"))
 
+    def terminal_ready(self, *args):
+        print(f"on_terminal_window_title_changed {args}")
+
+        pass
 
     def terminal_done(self, *_):
         self.nvim.async_call(lambda: self.nvim.close())
@@ -215,18 +262,22 @@ class NeowaitaWindow(Adw.ApplicationWindow):
 
     def resized(self):
         self.nvim.async_call(
-            lambda: self.nvim.ui_try_resize(self.box_width, self.box_height)
+            lambda: self.nvim.ui_try_resize(self.win_width, self.win_height)
         )
 
-    # XXX I think there must be a better way to get the box's width
+    # XXX I think there must be a better way to get the win's width and height
     @property
-    def box_width(self):
-        w = self.terminal_box.get_allocated_width()
+    def win_width(self):
+        w = self.get_allocated_width()
+
+        print(w)
 
         return w if w > 0 else self.props.default_width
 
     @property
-    def box_height(self):
-        h = self.terminal_box.get_allocated_height()
+    def win_height(self):
+        h = self.get_allocated_height()
+
+        print(h)
 
         return h if h > 0 else self.props.default_height

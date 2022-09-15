@@ -46,6 +46,7 @@ class NeowaitaApplication(Adw.Application):
     """The main application singleton class."""
 
     win: NeowaitaWindow
+    props: object
 
     def __init__(self):
         super().__init__(application_id="org.igorgue.NeoWaita",
