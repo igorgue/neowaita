@@ -13,7 +13,7 @@ button {
 }
 
 label {
-  color: red;
+  color: @window_fg_color;
 }
 
 window {

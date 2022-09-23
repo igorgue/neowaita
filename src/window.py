@@ -35,14 +35,15 @@ import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 gi.require_version("Vte", "3.91")
+
 from gi.repository import Gtk, Gio, Adw, Pango, Gdk, GLib, Vte
 
 from .utils import is_flatpak, get_socket_file, clean_socket
 
 
-@Gtk.Template(resource_path='/org/igorgue/NeoWaita/window.ui')
+@Gtk.Template(resource_path="/org/igorgue/NeoWaita/window.ui")
 class NeowaitaWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'NeowaitaWindow'
+    __gtype_name__ = "NeowaitaWindow"
 
     pid = -1
 
@@ -87,14 +88,16 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         self.terminal.set_scroll_on_keystroke(True)
         self.terminal.set_allow_bold(True)
 
-        self.terminal.connect("window-title-changed", self.on_terminal_window_title_changed)
+        self.terminal.connect(
+            "window-title-changed", self.on_terminal_window_title_changed
+        )
 
         if is_flatpak():
             self.command = [
                 "/usr/bin/flatpak-spawn",
                 "--host",
                 "--watch-bus",
-                *self.command
+                *self.command,
             ]
 
         clean_socket()
@@ -120,7 +123,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
             self.pid,
             self.cancellable,
             self.pty_ready,
-            None
+            None,
         )
 
         self.new_tab_button.connect("clicked", self.new_tab_clicked)
@@ -128,7 +131,9 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         style_context = self.get_style_context()
         display = Gdk.Display.get_default()
 
-        style_context.add_provider_for_display(display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        style_context.add_provider_for_display(
+            display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
     def overlay_motioned(self, _, *cords):
         if cords[1] < 40:
@@ -156,12 +161,21 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         self.terminal.grab_focus()
 
     def setup_nvim_loop(self):
-        notification_types = ["color-scheme"]
-        def setup_cb():
-            cmd = f"autocmd ColorScheme * call rpcnotify({self.cid}, 'color-scheme')"
-            self.nvim.command(cmd)
+        notification_types = ["color-scheme", "tabs-changed"]
 
-            self.overide_css_from_colorscheme()
+        def setup_cb():
+            cmds = [
+                f"autocmd ColorScheme * call rpcnotify({self.cid}, 'color-scheme')",
+                f"autocmd TabEnter * call rpcnotify({self.cid}, 'tabs-changed')",
+                f"autocmd TabLeave * call rpcnotify({self.cid}, 'tabs-changed')",
+                f"autocmd TabNew * call rpcnotify({self.cid}, 'tabs-changed')",
+                f"autocmd TabNewEntered * call rpcnotify({self.cid}, 'tabs-changed')",
+                f"autocmd TabClosed * call rpcnotify({self.cid}, 'tabs-changed')",
+                "set showtabline=0",
+            ]
+
+            for cmd in cmds:
+                self.nvim.command(cmd)
 
         def request_cb(*args):
             print(f"request_cb: {args}")
@@ -172,22 +186,41 @@ class NeowaitaWindow(Adw.ApplicationWindow):
             if name not in notification_types:
                 return
 
-            print(f"[notification_cb] {name}")
-
-            self.overide_css_from_colorscheme()
+            if name == "color-scheme":
+                self.overide_css_from_colorscheme()
+            if name == "tabs-changed":
+                self.update_tabs()
 
         def error_cb(msg):
             print(f"[error_cb] {msg}")
 
-        thread = threading.Thread(target=lambda: self.nvim.run_loop(request_cb, notification_cb, setup_cb, error_cb))
+        # Final initialization before starting the run loop
+        self.overide_css_from_colorscheme()
+
+        thread = threading.Thread(
+            target=lambda: self.nvim.run_loop(
+                request_cb, notification_cb, setup_cb, error_cb
+            )
+        )
         thread.setDaemon(True)
         thread.start()
 
+    def update_tabs(self):
+        tabs = self.nvim.tabpages
+
+        for tab in tabs:
+            print(f"[update_tabs] Tab #{tab.number} name = {tab.window.buffer.name}")
+
     def overide_css_from_colorscheme(self):
-        self.nvim.command("let g:neowaita_fg1 = synIDattr(synIDtrans(hlID('Normal')), 'fg#')")
-        self.nvim.command("let g:neowaita_fg2 = synIDattr(synIDtrans(hlID('PMenu')), 'fg#')")
-        self.nvim.command("let g:neowaita_bg1 = synIDattr(synIDtrans(hlID('Normal')), 'bg#')")
-        self.nvim.command("let g:neowaita_bg2 = synIDattr(synIDtrans(hlID('CursorLine')), 'bg#')")
+        cmds = [
+            "let g:neowaita_fg1 = synIDattr(synIDtrans(hlID('Normal')), 'fg#')",
+            "let g:neowaita_fg2 = synIDattr(synIDtrans(hlID('PMenu')), 'fg#')",
+            "let g:neowaita_bg1 = synIDattr(synIDtrans(hlID('Normal')), 'bg#')",
+            "let g:neowaita_bg2 = synIDattr(synIDtrans(hlID('CursorLine')), 'bg#')",
+        ]
+
+        for cmd in cmds:
+            self.nvim.command(cmd)
 
         fg1 = self.nvim.vars["neowaita_fg1"]
         fg2 = self.nvim.vars["neowaita_fg2"]
@@ -229,7 +262,6 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         css = str.encode(tpl)
 
         self.css_provider.load_from_data(css)
-
 
     def pty_cancelled(self, *args):
         print(f"pty_cancelled {args}")
