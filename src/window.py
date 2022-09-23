@@ -50,7 +50,7 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     env = []
     default_font = "Iosevka 14"
 
-    terminal: Vte.Terminal = Gtk.Template.Child()
+    terminal = Gtk.Template.Child()
     revealer = Gtk.Template.Child()
     headerbar = Gtk.Template.Child()
     overlay = Gtk.Template.Child()
@@ -66,8 +66,13 @@ class NeowaitaWindow(Adw.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.settings.set_property("gtk-double-click-distance", 0)
-        self.settings.set_property("gtk-double-click-time", 800)
+        # FIXME This hack makes double click work in the vte terminal
+        # but it also makes the window titlebar not work and I rather
+        # have the titlebar than double click on the terminal
+        # maybe try when I'm done with the tab bar and we no longer
+        # have a label as the titlebar.
+        # self.settings.set_property("gtk-double-click-distance", 0)
+        # self.settings.set_property("gtk-double-click-time", 800)
 
         self.terminal.set_pty(self.pty)
         self.terminal.set_font(Pango.FontDescription.from_string(self.default_font))
