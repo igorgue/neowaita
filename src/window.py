@@ -126,8 +126,12 @@ class NeowaitaWindow(Adw.ApplicationWindow):
         style_context.add_provider_for_display(display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def overlay_motioned(self, _, *cords):
-        self.revealer.set_visible(cords[1] < 40)
-        self.revealer.set_reveal_child(cords[1] < 40)
+        if cords[1] < 40:
+            self.revealer.set_visible(True)
+            self.revealer.set_reveal_child(True)
+        else:
+            GLib.timeout_add(314.16, self.revealer.set_visible, False)
+            GLib.timeout_add(314.16, self.revealer.set_reveal_child, False)
 
     def pty_ready(self, terminal, pid, *_):
         self.pid = pid
